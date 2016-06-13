@@ -5,7 +5,7 @@
 
 namespace wiz {
 
-	const long long BIGIINT_BASE = long long(1000000000); /// chk!!
+	const long long BIGIINT_BASE = long long(1000000000); /// chk!!  changable?
 	const std::vector<long long> zero_int(1, 0); /// ZERO_INT
 											 // const std::vector<long long> one_int( 1, '1' );
 	const std::vector<long long> ndef_int; ///  empty state..
@@ -306,7 +306,7 @@ namespace wiz {
 			}
 			else
 			{
-				for (int j = 1; j <= (BIGIINT_BASE-1); j++) {
+				for (long long j = 1; j <= (BIGIINT_BASE-1); j++) {
 					val.clear();
 					val = _int_minus(temp_concat, _int_multiple(_y, (j)));
 
@@ -499,14 +499,14 @@ int main(void)
 	BigInt x, y;
 	x = BigInt(std::vector<long long>{ 1 }, true);
 	y = BigInt(std::vector<long long>{ 1 }, true);
-	BigInt Max(std::vector<long long>{ 200 }, true);
+	BigInt Max(std::vector<long long>{ 222222222, 99999 }, true);
 	//
-	for (; x <= Max; x = x + BigInt(std::vector<long long>{1}, true))
+	//for (; x <= Max; x = x + BigInt(std::vector<long long>{1}, true))
 	{
-		y = y * x;
+	//	y = y * x;
 	}	
 	int b = clock();
-	//y = Max % BigInt(std::vector<long long>{ 123456 }, true);
+	y = Max / BigInt(std::vector<long long>{ 123456 }, true);
 	for( auto& val : y.val ) 
 		std::cout << val << std::endl;
 	std::cout << b - a << "ms" << std::endl;
