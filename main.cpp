@@ -1,11 +1,12 @@
-﻿
+
 #include <wiz/global.h>
 #include <wiz/wizardError.h>
 #include <vector>
 
+
 namespace wiz {
 
-	const long long BIGIINT_BASE = long long(1000000000); /// chk!!  changable?
+	const long long BIGIINT_BASE = (long long)1000000000; /// chk!!  changable?
 	const std::vector<long long> zero_int(1, 0); /// ZERO_INT
 											 // const std::vector<long long> one_int( 1, '1' );
 	const std::vector<long long> ndef_int; ///  empty state..
@@ -139,7 +140,7 @@ namespace wiz {
 		if (_x.empty()) { _x = zero_int; }
 		if (_y.empty()) { _y = zero_int; }
 
-		if (_x == _y) { return wiz::zero_int; }
+		if (IsSameValues( _x, _y)){ return wiz::zero_int; }
 		if (_x < _y) { throw wiz::Error(__FILE__, __LINE__, " in int_minus, must be x >= y, but now x < y. "); }
 
 
@@ -306,15 +307,15 @@ namespace wiz {
 			}
 			else
 			{
-				long long left = 0; long long right = BIGIINT_BASE - 1;
+				long long left = 0; long long right = ( BIGIINT_BASE - 1 );
 				long long middle = (left + right) >> 1; // 
 				//
 				while( left <= right ) {
-					middle = (left + right) >> 1;
+					middle = (left + right) >> 1; /// / 2
 
 					val.clear();
 					const std::vector<long long> llvec = _int_multiple(_y, middle);
-					if (llvec < temp_concat) {
+					if (llvec < temp_concat || IsSameValues( llvec, temp_concat ) ) {
 						val = _int_minus(temp_concat, llvec);
 					}
 					else {
@@ -322,13 +323,14 @@ namespace wiz {
 						continue;
 					}
 
+
 					if (val < _y && ( IsSameValues(  zero_int, val ) || zero_int < val )) {
 						vec_quo.push_back(middle);//
 						itemp.clear();
 						itemp = remove_first_zeros(val);
 						break;
 					}
-					else if (val > _y) {
+					else if (val > _y || IsSameValues( val, _y )) {
 						left = middle + 1;
 					}
 					else
@@ -517,7 +519,7 @@ int main(void)
 	BigInt x, y;
 	x = BigInt(std::vector<long long>{ 1 }, true);
 	y = BigInt(std::vector<long long>{ 1 }, true);
-	BigInt Max(std::vector<long long>{ 222222222, 99999 }, true);
+	BigInt Max(std::vector<long long>{ 22222222, 99999 }, true);
 	//
 	//for (; x <= Max; x = x + BigInt(std::vector<long long>{1}, true))
 	{
