@@ -5,3 +5,4 @@
 # ToDo
   1. main.cpp -> BigInt.h, test.cpp
   2. speed up in divison.
+  3. fix bug in division.
