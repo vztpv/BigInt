@@ -306,16 +306,34 @@ namespace wiz {
 			}
 			else
 			{
-				for (long long j = 1; j <= (BIGIINT_BASE-1); j++) {
-					val.clear();
-					val = _int_minus(temp_concat, _int_multiple(_y, (j)));
+				long long left = 0; long long right = BIGIINT_BASE - 1;
+				long long middle = (left + right) >> 1; // 
+				//
+				while( left <= right ) {
+					middle = (left + right) >> 1;
 
-					if (val < _y) {
-						// cout << "chk2 " << j << endl;
-						vec_quo.push_back((j));//
+					val.clear();
+					const std::vector<long long> llvec = _int_multiple(_y, middle);
+					if (llvec < temp_concat) {
+						val = _int_minus(temp_concat, llvec);
+					}
+					else {
+						right = middle - 1;
+						continue;
+					}
+
+					if (val < _y && ( IsSameValues(  zero_int, val ) || zero_int < val )) {
+						vec_quo.push_back(middle);//
 						itemp.clear();
 						itemp = remove_first_zeros(val);
 						break;
+					}
+					else if (val > _y) {
+						left = middle + 1;
+					}
+					else
+					{
+						right = middle - 1;
 					}
 				}
 				m = k + 1;
@@ -506,7 +524,7 @@ int main(void)
 	//	y = y * x;
 	}	
 	int b = clock();
-	y = Max / BigInt(std::vector<long long>{ 123456 }, true);
+	y = Max % BigInt(std::vector<long long>{ 7 }, true);
 	for( auto& val : y.val ) 
 		std::cout << val << std::endl;
 	std::cout << b - a << "ms" << std::endl;
