@@ -5,3 +5,6 @@
 # ToDo
   1. main.cpp -> BigInt.h, test.cpp
   2. speed up?
+  3. string -> BigInt
+  4. bit shift operation implementation
+  
