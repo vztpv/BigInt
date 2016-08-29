@@ -1,12 +1,116 @@
 
-#include <wiz/global.h>
-#include <wiz/wizardError.h>
-#include <vector>
 
+
+#define _CRT_SECURE_NO_WARNINGS
+
+//#include <wiz/wizardError.h>
+#include <vector>
+#include <algorithm>
+#include <iostream>
+#include <ctime>
+#include <cstring>
 
 namespace wiz {
+
+	template <typename T> /// x is 10진수..
+	inline T pos_1(const T x, const int base = 10) // 1의 자리 값 계산
+	{
+		if (x >= 0) { return x % base; }// x - ( x / 10 ) * 10; }
+		else { return (x / base) * base - x; }
+		// -( x - ( (x/10) * 10 ) )
+	}
+	template <typename T> /// T <- char, int, long, long long...
+	std::string toStr(const T x, const int base = 10) /// chk!!
+	{
+		if (base < 2 || base > 16) { return "base is not valid"; }
+		T i = x;
+
+		const int INT_SIZE = sizeof(T) << 3; ///*8
+		char* temp = new char[INT_SIZE + 1 + 1]; /// 1 NULL, 1 minus
+		std::string tempString;
+		int k;
+		bool isMinus = (i < 0);
+		temp[INT_SIZE + 1] = '\0'; ///문자열 표시..
+
+		for (k = INT_SIZE; k >= 1; k--) {
+			T val = pos_1<T>(i, base); /// 0 ~ base-1
+									   /// number to ['0'~'9'] or ['A'~'F']
+			if (val < 10) { temp[k] = val + '0'; }
+			else { temp[k] = val - 10 + 'A'; }
+
+			i /= base;
+
+			if (0 == i) { // 숫자열 끝..
+				k--;
+				break;
+			}
+		}
+
+		if (isMinus) {
+			temp[k] = '-';
+			tempString = std::string(temp + k);//
+		}
+		else {
+			tempString = std::string(temp + k + 1); //
+		}
+		delete[] temp;
+
+		return tempString;
+	}
+
+	/// chk.... need more thinking..., ToDo...
+	template <typename T> /// T <- char, int, long, long long...
+	std::string toStr2(const T x, const int str_space, const int base = 10) /// chk!!
+	{
+		if (base < 2 || base > 16) { return "base is not valid"; }
+		T i = x;
+		T k2 = 0;
+
+		const int INT_SIZE = sizeof(T) << 3; ///*8
+		char* temp = new char[INT_SIZE + 1 + 1]; /// 1 NULL, 1 minus
+		for (int i = 0; i < INT_SIZE + 2; ++i) { temp[i] = '0'; }//
+		std::string tempString;
+		int k;
+		bool isMinus = (i < 0);
+		temp[INT_SIZE + 1] = '\0'; ///문자열 표시..
+
+		for (k = INT_SIZE; k >= 1; k--) {
+			T val = pos_1<T>(i, base); /// 0 ~ base-1
+									   /// number to ['0'~'9'] or ['A'~'F']
+			if (val < 10) { temp[k] = val + '0'; }
+			else { temp[k] = val - 10 + 'A'; }
+
+			i /= base;
+
+			if (0 == i) { // 숫자열 끝..
+				k--;
+				break;
+			}
+		}
+
+		if (isMinus) {
+			temp[k] = '-';
+			tempString = std::string(temp + k);//
+		}
+		else {
+			if (INT_SIZE + 1 - (k + 1) + 1 < str_space + 1)
+			{
+				k2 = str_space + 1 - (INT_SIZE + 1 - (k + 1) + 1);
+			}
+			else
+			{
+				k2 = 0;
+			}
+			tempString = std::string(temp + k + 1 - k2); //
+		}
+		delete[] temp;
+
+		return tempString;
+	}
+
 	namespace big_int {
-		const long long BIGIINT_BASE = (long long)1000000000; /// chk!!  changable?
+		const long long BIGINT_BASE = (long long)1000000000; /// chk!!  changable?
+		const long long BIGINT_DIGIT_NUM = 9;
 		const std::vector<long long> zero_int(1, 0); /// ZERO_INT
 												 // const std::vector<long long> one_int( 1, '1' );
 		const std::vector<long long> ndef_int; ///  empty state..
@@ -78,16 +182,7 @@ namespace wiz {
 			}
 			return temp;
 		}
-		int max(const int a, const int b)
-		{
-			if (a > b) { return a; }
-			return b;
-		}
-		int min(const int a, const int b)
-		{
-			if (a > b) { return b; }
-			return a;
-		}
+
 		std::vector<long long> _int_plus(const std::vector<long long>& x, const std::vector<long long>& y)
 		{
 			// err-> return empty array of long long.
@@ -97,8 +192,8 @@ namespace wiz {
 			if (_x.empty()) { _x = zero_int; }
 			if (_y.empty()) { _y = zero_int; }
 
-			const int _max = wiz::big_int::max(_x.size(), _y.size());
-			const int _min = wiz::big_int::min(_x.size(), _y.size());
+			const int _max = std::max(_x.size(), _y.size());
+			const int _min = std::min(_x.size(), _y.size());
 			std::vector<long long> temp(_max + 1, 0);
 			long long itemp = 0;
 			int w = _x.size() - 1;
@@ -109,8 +204,8 @@ namespace wiz {
 			for (int num = 0; num < _min; num++)
 			{
 				long long sum = (_x[w]) + (_y[v]) + itemp;
-				temp[u] = (sum % BIGIINT_BASE);
-				itemp = sum / BIGIINT_BASE;
+				temp[u] = (sum % BIGINT_BASE);
+				itemp = sum / BIGINT_BASE;
 				w--;
 				v--;
 				u--;
@@ -118,15 +213,15 @@ namespace wiz {
 			for (; w >= 0; w--)
 			{
 				long long sum = (_x[w]) + itemp;
-				temp[u] = (sum % BIGIINT_BASE);
-				itemp = sum / BIGIINT_BASE;
+				temp[u] = (sum % BIGINT_BASE);
+				itemp = sum / BIGINT_BASE;
 				u--;
 			}
 			for (; v >= 0; v--)
 			{
 				long long sum = (_y[v]) + itemp;
-				temp[u] = (sum % BIGIINT_BASE);
-				itemp = sum / BIGIINT_BASE;
+				temp[u] = (sum % BIGINT_BASE);
+				itemp = sum / BIGINT_BASE;
 				u--;
 			}
 			temp[0] = (itemp);
@@ -144,7 +239,7 @@ namespace wiz {
 			if (_y.empty()) { _y = zero_int; }
 
 			if (IsSameValues(_x, _y)) { return wiz::big_int::zero_int; }
-			if (_x < _y) { throw wiz::Error(__FILE__, __LINE__, " in int_minus, must be x >= y, but now x < y. "); }
+			if (_x < _y) { throw 1; } // wiz::Error(__FILE__, __LINE__, " in int_minus, must be x >= y, but now x < y. "); }
 
 
 			std::vector<long long> temp(_x.size(), 0);
@@ -159,15 +254,15 @@ namespace wiz {
 				long long dif = (_x[w]) - (_y[v]);
 				if (dif < 0) /// chk!!
 				{
-					dif = dif + BIGIINT_BASE;
+					dif = dif + BIGINT_BASE;
 					long long count = w - 1;
 					while (_x[count] == 0) {
-						_x[count] = (BIGIINT_BASE - 1);
+						_x[count] = (BIGINT_BASE - 1);
 						count--;
 					}
 					_x[count]--;
 				}
-				temp[u] = (dif % BIGIINT_BASE);
+				temp[u] = (dif % BIGINT_BASE);
 
 				w--;
 				v--;
@@ -177,7 +272,7 @@ namespace wiz {
 			for (; w >= 0; w--)
 			{
 				long long dif = (_x[w]);
-				temp[u] = (dif % BIGIINT_BASE);
+				temp[u] = (dif % BIGINT_BASE);
 				u--;
 			}
 
@@ -197,8 +292,8 @@ namespace wiz {
 			for (int i = temp.size() - 1; i >= 1; i--)
 			{
 				long long sum = (ch) * (_x[i - 1]) + itemp;
-				temp[i] = (sum % BIGIINT_BASE);
-				itemp = sum / BIGIINT_BASE;
+				temp[i] = (sum % BIGINT_BASE);
+				itemp = sum / BIGINT_BASE;
 			}
 			temp[0] = (itemp);
 			std::vector<long long> ret = remove_first_zeros(temp);
@@ -228,7 +323,7 @@ namespace wiz {
 			}
 
 			std::vector<long long> ret = remove_first_zeros(sum);
-			if (ret.empty()) { 
+			if (ret.empty()) {
 				return wiz::big_int::zero_int;
 			}
 			return ret;
@@ -273,7 +368,7 @@ namespace wiz {
 			std::vector<long long> _x = remove_first_zeros(x);
 			const std::vector<long long> _y = remove_first_zeros(y);
 
-			if (_y.empty()) { throw wiz::Error(__FILE__, __LINE__, "_int_divide, x/0 error"); }
+			if (_y.empty()) { throw 2; } //  wiz::Error(__FILE__, __LINE__, "_int_divide, x/0 error"); }
 			if (_x.empty()) { _x = zero_int; }
 			if (_x < _y) {
 				quotient.clear(); quotient = wiz::big_int::zero_int;
@@ -283,7 +378,7 @@ namespace wiz {
 			}
 
 			//
-			vector<long long> vec_quo;
+			std::vector<long long> vec_quo;
 			int k = 0;
 			int m = 0;
 			std::vector<long long> itemp;
@@ -303,13 +398,13 @@ namespace wiz {
 					}
 					else if (k == _x.size()) {
 						itemp.clear();
-						itemp = temp_concat; 
+						itemp = temp_concat;
 						break;
 					}
 				}
 				else
 				{
-					long long left = 0; long long right = (BIGIINT_BASE - 1);
+					long long left = 0; long long right = (BIGINT_BASE - 1);
 					long long middle = (left + right) >> 1; // 
 					//
 					while (left <= right) {
@@ -355,6 +450,52 @@ namespace wiz {
 
 		class BigInt /// class : long Int...
 		{
+		private:
+			std::string remove_first_zeros(const std::string& str)
+			{
+				std::string temp;
+				int state = 0;
+
+				for (int i = 0; i < str.size(); ++i) {
+					if (str[i] == '0' && state == 0) {
+
+					}
+					else if (str[i] != '0') {
+						state = 1;
+					}
+
+					if (state == 1)
+					{
+						temp.push_back(str[i]);
+					}
+				}
+				if (temp.empty()) { return "0"; }
+				return temp;
+			}
+			bool IsInteger(const std::string& str) {
+				int state = 0;
+				for (int i = 0; i < str.size(); ++i) {
+					switch (state)
+					{
+					case 0:
+						if ('+' == str[i] || '-' == str[i]) {
+							state = 0;
+						}
+						else if (str[i] >= '0' && str[i] <= '9')
+						{
+							state = 1;
+						}
+						else return false;
+						break;
+					case 1:
+						if (str[i] >= '0' && str[i] <= '9') {
+							state = 1;
+						}
+						else return false;
+					}
+				}
+				return 1 == state;
+			}
 		public:
 			std::vector<long long> val; /// absolute value!
 			bool sign; /// +(true), -(false)
@@ -367,10 +508,55 @@ namespace wiz {
 				: val(val), sign(sign)
 			{
 			}
-
-			explicit BigInt(const std::string& str)
+			BigInt(const BigInt& other)
 			{
-				/// To Do !! 9 자리 씪 끝는다.
+				val = other.val;
+				sign = other.sign;
+			}
+			BigInt(const long long number)
+			{
+				/// chk size of number!
+				/// to string -> toBigInt
+				std::string str = wiz::toStr2(number, 9); /// remove first zeros?
+				str = remove_first_zeros(str); /// need for test!!
+				(*this) = BigInt(str);
+			}
+			BigInt(const std::string& str)
+			{
+				if (false == IsInteger(str)) { return; }
+				/// str is not integer type, then err!?
+
+				bool isMinus = false;
+				int size = 0;
+				char* arr = NULL;
+				if (str[0] == '-') {
+					sign = false;
+					isMinus = true;
+					arr = new char[str.size()];
+					size = str.size() - 1;
+					strcpy(arr, str.c_str() + 1);
+				}
+				else {
+					sign = true;
+					arr = new char[str.size() + 1];
+					strcpy(arr, str.c_str());
+					size = str.size();
+				}
+
+				while (true)
+				{
+					/// todo - fix!!
+					size = std::max(size - 9, 0);
+					val.push_back(atoll(arr + size));
+
+					if (size == 0) {
+						break;
+					}
+					arr[size] = '\0';
+				}
+
+				delete[] arr;
+				std::reverse(val.begin(), val.end());
 			}
 
 			BigInt& operator=(const BigInt& longInt)
@@ -382,12 +568,24 @@ namespace wiz {
 
 				return *this;
 			}
+			BigInt& operator=(BigInt&& other)
+			{
+				this->val = std::move(other.val);
+				std::swap(this->sign, other.sign);
+				return *this;
+			}
 		public:
-			//  <
-			// ==
+			friend bool operator!=(const BigInt& num1, const BigInt& num2)
+			{
+				return !IsSameValues((num1 - num2).val, zero_int);
+			}
 			friend bool operator<(const BigInt& num1, const BigInt& num2)
 			{
 				return (num1 - num2).sign == false;
+			}
+			friend bool operator>(const BigInt& num1, const BigInt& num2)
+			{
+				return num2 < num1;
 			}
 			friend bool operator==(const BigInt& num1, const BigInt& num2)
 			{
@@ -397,12 +595,15 @@ namespace wiz {
 			{
 				return num1 < num2 || num1 == num2;
 			}
-
+			friend bool operator>=(const BigInt& num1, const BigInt& num2)
+			{
+				return num1 > num2 || num1 == num2;
+			}
 			friend BigInt operator+(const BigInt& num1, const BigInt& num2)
 			{
 				if (num1.val.empty() || num2.val.empty())
 				{
-					throw wiz::Error(__FILE__, __LINE__, "empty problem, in + ");
+					throw 3; // wiz::Error(__FILE__, __LINE__, "empty problem, in + ");
 				}
 				BigInt number;
 
@@ -451,7 +652,7 @@ namespace wiz {
 			{
 				if (num1.val.empty() || num2.val.empty())
 				{
-					throw wiz::Error(__FILE__, __LINE__, "empty problem, in - ");
+					throw 4; // wiz::Error(__FILE__, __LINE__, "empty problem, in - ");
 				}
 				BigInt number = num2;
 				number.sign = !number.sign;
@@ -462,7 +663,7 @@ namespace wiz {
 			{
 				if (num1.val.empty() || num2.val.empty())
 				{
-					throw wiz::Error(__FILE__, __LINE__, "empty problem, in * ");
+					throw 5; // wiz::Error(__FILE__, __LINE__, "empty problem, in * ");
 				}
 				BigInt temp;
 				temp.val = _int_multiple(num1.val, num2.val);
@@ -474,7 +675,7 @@ namespace wiz {
 			{
 				if (num1.val.empty() || num2.val.empty())
 				{
-					throw wiz::Error(__FILE__, __LINE__, "empty problem, in / ");
+					throw 6; // wiz::Error(__FILE__, __LINE__, "empty problem, in / ");
 				}
 				BigInt temp;
 				std::vector<long long> quotient;
@@ -491,11 +692,11 @@ namespace wiz {
 			{
 				if (num1.val.empty() || num2.val.empty())
 				{
-					throw wiz::Error(__FILE__, __LINE__, "empty problem, in % ");
+					throw 7; // wiz::Error(__FILE__, __LINE__, "empty problem, in % ");
 				}
 				if (!num1.sign || !num2.sign) /// chk...
 				{
-					throw wiz::Error(__FILE__, __LINE__, "BigInt%, sign is minus");
+					throw 8; // wiz::Error(__FILE__, __LINE__, "BigInt%, sign is minus");
 				}
 
 				BigInt temp;
@@ -516,10 +717,6 @@ namespace wiz {
 
 }
 
-using namespace wiz;
-
-#include <iostream>
-#include <ctime>
 
 int main(void)
 {
@@ -531,12 +728,12 @@ int main(void)
 	//
 	//for (; x <= Max; x = x + BigInt(std::vector<long long>{1}, true))
 	{
-	//	y = y * x;
-	}	
+		//	y = y * x;
+	}
 	int b = clock();
 	y = Max / wiz::big_int::BigInt(std::vector<long long>{ 95448 }, true);
 
-	for( auto& val : y.val ) 
+	for (auto& val : y.val)
 		std::cout << val << std::endl;
 	std::cout << b - a << "ms" << std::endl;
 
