@@ -3,8 +3,8 @@
  2. Using C++11, Visual Studio 2015, in Windows10
  
 # ToDo
-  1. main.cpp -> BigInt.h, test.cpp
+  DONE - 1. main.cpp -> BigInt.h, test.cpp
   2. speed up?
-  3. string -> BigInt
+  DONE - 3. string -> BigInt
   4. bit shift operation implementation
   
